@@ -1,0 +1,23 @@
+clear
+units electron
+boundary p p p
+atom_modify sort 0 0.0
+
+### interactions
+atom_style full
+pair_style      lj/cut/tip4p/long 1 2 1 1 0.278072379 17.007
+bond_style      class2 
+angle_style     harmonic
+kspace_style pppm/tip4p 0.0001
+read_data tmp/data.lammps
+pair_coeff  2  2 0 0
+pair_coeff  1  2 0 0
+pair_coeff  1  1  0.000295147 5.96946
+neighbor 2.0 bin
+min_style cg
+minimize 1e-6 1e-6 10000 10000
+dump dump_all all custom 1 dump.xyz element x y z
+thermo_style custom pe pxx
+thermo_modify flush yes
+thermo 1
+run 0

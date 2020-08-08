@@ -7,6 +7,7 @@ from spglib import get_symmetry_dataset
 from ase.optimize.fire import FIRE
 from ase import Atoms
 from ase.optimize import BFGS
+from ase.optimize.lbfgs import LBFGS
 from ase.build import sort
 import logging
 from random import randint
@@ -37,6 +38,7 @@ parameters = ["atom_style full",
               "neighbor 2.0 bin",
               "min_style cg",
               "minimize 1e-6 1e-6 10000 10000",
+              "dump dump_all all custom 1 dump.xyz element x y z",
              ]
 
 # setup folders
@@ -57,10 +59,10 @@ data = {#"ID":[],
         "Volume":[],
         }
 
-for i in range(100):
+for i in range(1):
     while True:
-        sg = randint(16,191)
-        crystal = molecular_crystal(sg, ['H2O'], [4], 1.0)#, lattice=para)
+        sg = randint(2,230)
+        crystal = molecular_crystal(sg, ['H2O'], [randint(1,4)], 1.0)#, lattice=para)
         if crystal.valid:
             struc = Atoms(crystal.spg_struct[2], 
                           cell=crystal.spg_struct[0], 
@@ -71,10 +73,15 @@ for i in range(100):
     lammps = LAMMPSlib(lmp=lmp, lmpcmds=parameters, mol=True)
     struc.set_calculator(lammps)
     box = mushybox(struc)
+
     dyn = FIRE(box)
-    dyn.run(fmax=0.01, steps=200)
-    dyn = BFGS(box)
-    dyn.run(fmax=0.01, steps=200)
+    dyn.run(fmax=0.00, steps=1100)
+
+    #dyn = BFGS(box)
+    #dyn.run(fmax=0.01, steps=200)
+
+    #dyn = BFGS(box)
+    #dyn.run(fmax=0.01, steps=200)
     Eng = struc.get_potential_energy()*96/len(struc)*3
     Vol = struc.get_volume()/len(struc)*3
     stress = np.max(struc.get_stress())
